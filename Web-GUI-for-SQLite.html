@@ -1,0 +1,219 @@
+<html>
+<head>
+	<title>SQLite WebJS</title>
+	<script src="./external/sql/sql.js"></script>
+	<script src="./external/codemirror/codemirror.js"></script>
+	<link href="./external/codemirror/codemirror.css" rel="stylesheet" />
+	<script src="./external/codemirror/mode/sql/sql.js"></script>
+	<script src="./Web-GUI-for-SQLite.js"></script>
+	<link href="./Web-GUI-for-SQLite.css" rel="stylesheet" />
+</head>
+<body>
+	<h1>SQLite WebJS</h1>
+	<div class="SQLite-WebJS-Database">
+		<div class="SQLite-WebJS-database-title">Your database</div>
+		<div class="SQLite-WebJS-database-container">
+			<img id="update" src="./image/update.png" class="SQLite-WebJS-browser-update" />
+			<span id="table" class="SQLite-WebJS-browser-structure">Table</span>
+			<div id="table-list" style="display:none;">No table</div>
+			<div></div>
+			<span id="view" class="SQLite-WebJS-browser-structure">View</span>
+			<div id="view-list" style="display:none;">No view</div>
+		</div>
+	</div>
+	<div class="SQLite-WebJS-container">
+		<input type="file" id="file-input" style="display: none;"  />
+		<div class="SQLite-WebJS-tabber">
+			<ul class="SQLite-WebJS-browser-javascript-tabber">
+				<li id="tab-row">Browse</li>
+				<li id="tab-structure">Structure</li>
+				<li id="tab-SQL">SQL</li>
+				<li id="tab-insert">Insert</li>
+				<li id="tab-import">Import CSV file</li>
+				<li id="tab-open-file">Open SQLite file</li>
+				<li id="tab-export-file">Export SQLite file</li>
+			</ul>
+		</div>
+		<div class="editor-message-container"><div id="editor-message" style="display:none;"></div></div>
+		<div id="container-row" class="SQLite-WebJS-container-center">
+			<div class="SQLite-WebJS-container-row SQLite-WebJS-scroll">	
+				<table id="row-results" class="SQLite-WebJS-results">
+					<thead></thead>
+					<tbody></tbody>
+				</table>
+			</div>
+			<br/>
+			<div id="exportToCSVRowContainer" class="SQLite-WebJS-export-container" style="display:none;">
+				<br/>
+				<table class="SQLite-WebJS-results">
+					<tbody>
+						<tr>
+							<td>
+								Separator
+							</td>
+							<td>
+								<select class="select-action" id="separatorRow"><option value=";">Semicolon</option><option value=",">Comma	</option><option value="	">Tab</option></select>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								NULL string
+							</td>
+							<td>
+								<input id="nullStringRow" type="text" value="\N">
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Header
+							</td>
+							<td>
+								<select class="select-action" id="headerRow"><option value="yes">Yes</option><option value="no">No</option></select>
+							</td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr>
+							<td colspan="2">
+								<div class="SQLite-WebJS-container-center">
+									<input type="button" value="export to CSV" id="exportToCSVRow" class="SQLite-WebJS-button" />
+								</div>
+							</td>
+						</tr>
+					</tfoot>
+				</table>
+			</div>
+		</div>
+		<div id="container-structure" class="SQLite-WebJS-structure">
+		</div>
+		<div id="container-SQL">
+			<input type="button" class="SQLite-WebJS-button SQLite-WebJS-execute-query" id="ExecuteQuery" value="Execute query" />
+			<br/><br/>
+			<div class="SQLite-WebJS-editor-container">
+				<textarea id="editor-container" style="display:none;">SELECT name, sql FROM sqlite_master WHERE type='table' ;</textarea>
+			</div>
+			<br/>
+			<div class="SQLite-WebJS-container-center">
+				<div class="SQLite-WebJS-container-row SQLite-WebJS-scroll">
+					<table id="results" class="SQLite-WebJS-results">
+						<thead></thead>
+						<tbody></tbody>
+					</table>
+				</div>
+				<br/>
+				<div id="exportToCSVContainer" class="SQLite-WebJS-export-container" style="clear:both; display:none;">
+					<br/>
+					<table class="SQLite-WebJS-results">
+						<tbody>
+							<tr>
+								<td>
+									Separator
+								</td>
+								<td>
+									<select class="select-action" id="separator"><option value=";">Semicolon</option><option value=",">Comma	</option><option value="	">Tab</option></select>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									NULL string
+								</td>
+								<td>
+									<input id="nullString" type="text" value="\N">
+								</td>
+							</tr>
+							<tr>
+								<td>
+									Header
+								</td>
+								<td>
+									<select class="select-action" id="headerQuery"><option value="yes">Yes</option><option value="no">No</option></select>
+								</td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<tr>
+								<td colspan="2">
+									<div class="SQLite-WebJS-container-center">
+										<input type="button" value="export to CSV" id="exportToCSV" class="SQLite-WebJS-button" />
+									</div>
+								</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+			</div>
+			<br/>
+		</div>
+		<div id="container-import">
+			<div class="SQLite-WebJS-container-center">
+				<input type="file" id="csv-file-input" style="display: none;" />
+				<table class="SQLite-WebJS-results">
+					<tbody>
+						<tr>
+							<td>
+								Separator
+								<br/> Specifies the character that separates columns within each row
+							</td>
+							<td>
+								<select class="select-action" id="ImportSeparator"><option value=";">Semicolon</option><option value=",">Comma	</option><option value="	">Tab</option></select>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								NULL string
+								<br/> Specifies the string that represents a null value
+							</td>
+							<td>
+								<input id="ImportNullString" type="text" value="\N">
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Header
+								<br/> Specifies that the file contains a header line with the names of column to import
+							</td>
+							<td>
+								<select class="select-action" id="ImportHeader"><option value="yes">Yes</option><option value="no">No</option></select>
+							</td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr>
+							<td colspan="2">
+								<div class="SQLite-WebJS-container-center">
+									<input type="button" class="SQLite-WebJS-button" value="Upload your CSV file" id="selectCSVFile" />
+								</div>
+							</td>
+						</tr>
+					</tfoot>
+				</table>
+			</div>
+		</div>
+		<div id="container-insert" class="SQLite-WebJS-container-center">
+			<table id="row-insert" class="SQLite-WebJS-results">
+				<thead>
+					<th>Column</th>
+					<th>Type</th>
+					<th>Null</th>
+					<th>Value</th>
+				</thead>
+				<tbody></tbody>
+				<tfoot>
+					<th colspan="4">
+						<div class="SQLite-WebJS-container-center">
+							<input type="button" class="SQLite-WebJS-button" value="Insert" id="insertElementToTable" />
+						</div>
+					</th>
+				</tfoot>
+			</table>
+		</div>
+	</div>
+	<script>
+		sqliteWebJS = null;
+		window.addEventListener("load", function(event) {
+			sqliteWebJS = new SQLiteWebJS();
+			sqliteWebJS.init();
+		});
+	</script>
+</body>
+</html>

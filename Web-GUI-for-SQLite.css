@@ -1,0 +1,32 @@
+body {min-width:800px;max-width:1300px;padding:20px;}
+h1 {color: #4DAF52;font-size: 3.1em;font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;font-weight: 900;text-align: center;margin: 0;}
+.SQLite-WebJS-results{margin: 0 auto; border:1px solid #bbbbbb;border-collapse:collapse;margin-top:16px;}
+.SQLite-WebJS-results td{padding:8px;margin:0px;border:0px;}
+.SQLite-WebJS-results tbody > tr > td, .SQLite-WebJS-results thead > tr > th, .SQLite-WebJS-results tfoot > tr > th{padding:8px;margin:0px;border:1px solid #bbbbbb;font-weight:bold;color:gray;text-align:center;}
+.SQLite-WebJS-results-odd{background-color:#E6E6E6;}
+.SQLite-WebJS-container-center {text-align:center;}
+.SQLite-WebJS-export-container{overflow-x:auto;white-space:nowrap;text-align:center;}
+.editor-message-container {height:38px;}
+.SQLite-WebJS-editor-error{color:red;padding:8px;background-color:#F6CECE;margin:10px 0px;}
+.SQLite-WebJS-editor-valid{color:green;padding:8px;background-color:#D0F5A9;margin:10px 0px;}
+.SQLite-WebJS-editor-inprogress{color:orange;padding:8px;background-color:#ffe680;margin:10px 0px;}
+.SQLite-WebJS-structure {border:2px solid #bbbbbb;padding:0px;margin-top:8px;padding:10px;}
+.SQLite-WebJS-container {float:right;width:72%;margin-left:2%;}
+.SQLite-WebJS-tabber {text-align:center;}
+.SQLite-WebJS-database {margin-top: 10px;margin-bottom: 10px;border: 1px solid #424242;word-wrap: break-word;text-align: left;float: left;width:25%;}
+.SQLite-WebJS-database-title {background-color: #424242;color: white;text-align: center;font-size: 17px;font-weight: bold;padding: 5px;}
+.SQLite-WebJS-database-container {padding:8px;}
+.SQLite-WebJS-browser-structure {font-size:17px;font-weight:bold;cursor:pointer;}
+.SQLite-WebJS-browser-img-click {max-width:15px;margin-right:12px;}
+.SQLite-WebJS-browser-update {max-width:40px;float:right;cursor:pointer;}
+.SQLite-WebJS-browser-canbeclick {cursor:pointer;margin-left:8px;margin-top:2px;margin-bottom:2px;}
+.SQLite-WebJS-browser-javascript-tabber {display:inline-block;}
+.SQLite-WebJS-button {cursor:pointer;font-size:13px;font-weight:bold;background:#fff;color:#000;border:1px solid #bbbbbb;cursor:pointer;text-decoration:none;border-radius:3px;-moz-border-radius:3px;-webkit-border-radius:3px;padding:6px 18px;background-color:#4DAF52;color:white;}
+.SQLite-WebJS-button :hover {background-color:gray;}
+.SQLite-WebJS-execute-query {	float: right;}
+.SQLite-WebJS-editor-container{border:2px solid #bbbbbb;padding:0px;margin-top:8px;}
+.SQLite-WebJS-browser-javascript-tabber li{padding:8px;font-size:18px;font-weight:bold;background-color:white;display:inline-block;list-style:none;border:1 px solid gray;border-radius: 8px;margin-left:8px;margin-top:8px;cursor:pointer;}
+li.SQLite-WebJS-browser-javascript-tabber-select {font-weight:bold;background-color:#99ff99;}
+.SQLite-WebJS-container-row {max-height:600px;overflow: auto;}
+.SQLite-WebJS-browser-order {cursor:pointer;font-size:15px;}
+.SQLite-WebJS-scroll{overflow:auto;}
