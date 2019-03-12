@@ -630,7 +630,7 @@ class SQLiteWebJS {
 			}
 		}
 	}
-	readSingleFile = function(e, readAs, callback) {
+	readSingleFile (e, readAs, callback) {
 		var files;
 		if (e.target && e.target.files) {
 			files = e.target.files;
