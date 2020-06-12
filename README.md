@@ -11,7 +11,8 @@ Try the demo here: [https://extendsclass.com/sqlite-browser.html](https://extend
 ## Dependencies 
 
 This tool required:
- * [CodeMirror](https://github.com/codemirror/CodeMirror) (MIT license)
+ * [a11y-dialog](https://github.com/edenspiekermann/a11y-dialog) (MIT license)
+ * [codeMirror](https://github.com/codemirror/CodeMirror) (MIT license)
  * [sql.js](https://github.com/kripken/sql.js/) (MIT license)
 
 ## Install
