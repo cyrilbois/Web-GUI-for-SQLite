@@ -14,6 +14,7 @@ This tool required:
  * [a11y-dialog](https://github.com/edenspiekermann/a11y-dialog) (MIT license)
  * [codeMirror](https://github.com/codemirror/CodeMirror) (MIT license)
  * [sql.js](https://github.com/kripken/sql.js/) (MIT license)
+ * [github corners](https://github.com/tholman/github-corners) (MIT license)
 
 ## Install
 
