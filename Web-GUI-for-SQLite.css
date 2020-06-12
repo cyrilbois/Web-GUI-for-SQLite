@@ -1,5 +1,7 @@
-body {min-width:800px;max-width:1300px;padding:20px;}
-h1 {color: #4DAF52;font-size: 3.1em;font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;font-weight: 900;text-align: center;margin: 0;}
+body {margin:0; padding:0; font-family: Verdana, "Bitstream Vera Sans", "Lucida Grande", sans-serif;}
+header {margin:0; padding:0;background-color: #121212;min-height: 80px;}
+h1 {color: white;font-size: 3.1em;font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;font-weight: 900;text-align: center;margin: 0;}
+.SQLite-WebJS-body {}
 .SQLite-WebJS-results{margin: 0 auto; border:1px solid #bbbbbb;border-collapse:collapse;margin-top:16px;}
 .SQLite-WebJS-results td{padding:8px;margin:0px;border:0px;}
 .SQLite-WebJS-results tbody > tr > td, .SQLite-WebJS-results thead > tr > th, .SQLite-WebJS-results tfoot > tr > th{padding:8px;margin:0px;border:1px solid #bbbbbb;font-weight:bold;color:gray;text-align:center;}
@@ -11,17 +13,17 @@ h1 {color: #4DAF52;font-size: 3.1em;font-family: "Helvetica Neue", Helvetica, Ar
 .SQLite-WebJS-editor-valid{color:green;padding:8px;background-color:#D0F5A9;margin:10px 0px;}
 .SQLite-WebJS-editor-inprogress{color:orange;padding:8px;background-color:#ffe680;margin:10px 0px;}
 .SQLite-WebJS-structure {border:2px solid #bbbbbb;padding:0px;margin-top:8px;padding:10px;}
-.SQLite-WebJS-container {float:right;width:72%;margin-left:2%;}
+.SQLite-WebJS-container {float:right;width:67%;margin-left:2%;}
 .SQLite-WebJS-tabber {text-align:center;}
-.SQLite-WebJS-database {margin-top: 10px;margin-bottom: 10px;border: 1px solid #424242;word-wrap: break-word;text-align: left;float: left;width:25%;}
-.SQLite-WebJS-database-title {background-color: #424242;color: white;text-align: center;font-size: 17px;font-weight: bold;padding: 5px;}
+.SQLite-WebJS-database {margin-top: 10px;margin-bottom: 10px;border: 1px solid #121212;word-wrap: break-word;text-align: left;float: left;width:30%; max-width: 400px;}
+.SQLite-WebJS-database-title {background-color: #121212;color: white;text-align: center;font-size: 17px;font-weight: bold;padding: 5px;}
 .SQLite-WebJS-database-container {padding:8px;}
 .SQLite-WebJS-browser-structure {font-size:17px;font-weight:bold;cursor:pointer;}
 .SQLite-WebJS-browser-img-click {max-width:15px;margin-right:12px;}
 .SQLite-WebJS-browser-update {max-width:40px;float:right;cursor:pointer;}
 .SQLite-WebJS-browser-canbeclick {cursor:pointer;margin-left:8px;margin-top:2px;margin-bottom:2px;}
 .SQLite-WebJS-browser-javascript-tabber {display:inline-block;}
-.SQLite-WebJS-button {cursor:pointer;font-size:13px;font-weight:bold;background:#fff;color:#000;border:1px solid #bbbbbb;cursor:pointer;text-decoration:none;border-radius:3px;-moz-border-radius:3px;-webkit-border-radius:3px;padding:6px 18px;background-color:#4DAF52;color:white;}
+.SQLite-WebJS-button {cursor:pointer;font-size:13px;font-weight:bold;background:#fff;color:#000;border:1px solid #bbbbbb;cursor:pointer;text-decoration:none;border-radius:3px;-moz-border-radius:3px;-webkit-border-radius:3px;padding:6px 18px;background-color:#121212;color:white;}
 .SQLite-WebJS-button :hover {background-color:gray;}
 .SQLite-WebJS-execute-query {	float: right;}
 .SQLite-WebJS-editor-container{border:2px solid #bbbbbb;padding:0px;margin-top:8px;}
@@ -30,3 +32,226 @@ li.SQLite-WebJS-browser-javascript-tabber-select {font-weight:bold;background-co
 .SQLite-WebJS-container-row {max-height:600px;overflow: auto;}
 .SQLite-WebJS-browser-order {cursor:pointer;font-size:15px;}
 .SQLite-WebJS-scroll{overflow:auto;}
+nav.menu-intool {
+	margin-top:2px;
+	font-weight:bold;
+}
+
+nav.menu-intool ul {
+  background: #121212;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+display: flex;flex-wrap: wrap;
+  justify-content: center;
+  text-align: center; 
+}
+nav.menu-intool ul li {
+  position: relative;
+  display: inline-block;
+  margin-right: -4px;
+  text-align: center;
+}
+nav.menu-intool ul li:last-child {
+  margin: 0;
+}
+nav.menu-intool ul li a {
+  display: block;
+  background: #121212;
+  padding: 15px 20px;
+  color: #fff;
+  font-size: 1.1em;
+  text-decoration: none;
+  transition: 0.2s linear;
+}
+nav.menu-intool ul li a.sub-menu-important {
+	color: #4DAF52;
+	font-size: 1.2em;
+ }
+
+nav.menu-intool ul li a:hover {
+  background: gray;
+  cursor:pointer;
+}
+nav.menu-intool ul li ul {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 240px;
+  border-bottom: 4px solid #121212;
+  flex-direction: column;
+  display: flex;
+  
+}
+nav.menu-intool ul li ul li {
+  display: block;
+  width: 100%;
+  margin: 0;
+  text-align: left;
+  z-index: 1001;
+}
+nav.menu-intool ul li ul li a {
+  display: block;
+  background: #3a3a3a;
+  padding: 10px 15px;
+}
+nav.menu-intool ul li ul li a:hover {
+  background: gray;
+  border-left: 4px solid #121212;
+}
+.arrow {
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+}
+
+.up {
+  transform: rotate(-135deg);
+  -webkit-transform: rotate(-135deg);
+}
+
+.down {
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+}
+
+
+
+
+.arrow-right {
+  display: inline-block;
+  overflow: hidden;
+  position: relative;
+  height: 16px;
+  width: 8px;
+  margin-left:15px;
+}
+
+
+.arrow-right:before {
+  border: 8px solid transparent;
+  content: ' ';
+  display: block;
+  position: absolute;
+  z-index: 2;
+  border-left-color: #4DAF52;
+  left: 0;
+  top: 2px;  
+}
+[data-a11y-dialog-native] .dialog-overlay {
+    display: none
+}
+
+dialog[open] {
+    display: block
+}
+
+.dialog[aria-hidden="true"] {
+    display: none
+}
+
+dialog::backdrop {
+    background-color: rgba(0,0,0,0.66)
+}
+
+.dialog-content {
+    background-color: #fff;
+    z-index: 3;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%,-50%);
+    -ms-transform: translate(-50%,-50%);
+    transform: translate(-50%,-50%);
+    margin: 0;
+	max-height:90%;
+	overflow-y: scroll;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0
+    }
+
+    to {
+        opacity: 1
+    }
+}
+
+@keyframes appear {
+    from {
+        transform: translate(-50%,-40%);
+        opacity: 0
+    }
+
+    to {
+        transform: translate(-50%,-50%);
+        opacity: 1
+    }
+}
+
+.dialog:not([aria-hidden='true']) > .dialog-overlay {
+    animation: fade-in 200ms 1 both
+}
+
+.dialog:not([aria-hidden='true']) > .dialog-content {
+    animation: appear 400ms 150ms 1 both
+}
+
+.dialog-content {
+    padding: 1em;
+    max-width: 90%;
+    width: 600px;
+    border-radius: 2px
+}
+
+.dialog-container {
+    padding: 20px
+}
+
+.dialog h1, .dialog .title {
+    display: block;
+    font-weight: 900;
+    text-align: center;
+    margin: 0;
+    font-size: 2.25em;
+    font-family: 'ESPI Slab',sans-serif;
+    line-height: 1.1;
+    color: #616161
+}
+
+.dialog-close {
+    position: absolute;
+    top: .5em;
+    right: .5em;
+    border: 0;
+    padding: 0;
+    background-color: transparent;
+    font-weight: 700;
+    font-size: 1.25em;
+    width: 1.2em;
+    height: 1.2em;
+    text-align: center;
+    cursor: pointer;
+    transition: .15s
+}
+
+@media screen and (min-width: 700px) {
+    .dialog-close {
+        top: 1em;
+        right: 1em
+    }
+}
+.dialog-content {
+    width: 90%;
+}
+.dialog-content-small {
+	max-width: 500px;
+}
+
+.dialog-container {
+    max-width: 99%;
+    overflow-x: scroll;
+}
+

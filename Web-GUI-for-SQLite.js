@@ -11,17 +11,13 @@ var ReadModeEnum = {
 };
 class SQLiteWebJS {
 	constructor() {
+		this.dialogTable = null;
+		this.dialogData = null;
 		this.db = null;
 		this.messages = null;
 		this.myCodeMirror = null;
 		this.currentStructure = null;
 		this.currentQuery = null;
-		this.tabs = ['row', 'structure', 'SQL', 'insert', 'import', 'open-file', 'export-file'];
-		this.tabsPerType = {
-			nothing: ['SQL', 'open-file', 'export-file'],
-			table: ['row', 'structure', 'SQL', 'insert', 'import', 'open-file', 'export-file'],
-			view: ['row', 'structure', 'SQL', 'open-file', 'export-file']
-		};
 	}
 	createDatabase () {
 		this.db = new SQL.Database();
@@ -75,15 +71,6 @@ class SQLiteWebJS {
 		this.db.each("SELECT name, sql FROM sqlite_master WHERE type='table' ", {}, function(row){ tables.push(row); });
 		return tables;
 	}
-	manageTabs(type) {
-		this.tabs.forEach(function (t) {
-			document.getElementById('tab-' + t).classList.remove('SQLite-WebJS-browser-javascript-tabber-select');
-			document.getElementById('tab-' + t).style.display = 'none';
-		});
-		this.tabsPerType[type].forEach(function (t) {
-			document.getElementById('tab-' + t).style.display = '';
-		});
-	}
 	setMessage(type, message) {
 		while (this.message.classList.length > 0) {
 		   this.message.classList.remove(this.message.classList.item(0));
@@ -99,21 +86,10 @@ class SQLiteWebJS {
 		this.message.innerText = '';
 		this.message.style.display = 'none';
 	}
-	selectTab (tab) {
-		this.resetMessage();
-		this.tabs.forEach(function (t) {
-			document.getElementById('tab-' + t).classList.remove('SQLite-WebJS-browser-javascript-tabber-select');
-			if (document.getElementById('container-' + t)) document.getElementById('container-' + t).style.display = 'none';
-		});
-		document.getElementById('tab-' + tab).classList.add('SQLite-WebJS-browser-javascript-tabber-select');
-		if (document.getElementById('container-' + tab)) document.getElementById('container-' + tab).style.display = '';
-	}
 	openSQLite() {
-		this.selectTab ('open-file');
 		document.getElementById('file-input').click();
 	}
 	selectCSVFile() {
-		this.selectTab ('row');
 		document.getElementById('csv-file-input').click();
 	}
 	exportFile(fileObject) {
@@ -135,7 +111,6 @@ class SQLiteWebJS {
 		}
 	}
 	exportDatabaseFile() {
-		this.selectTab('export-file');
 		if (!this.db) {
 			this.createDatabase();
 		}
@@ -175,25 +150,58 @@ class SQLiteWebJS {
 		var viewData = {type: Structure.VIEW, name: viewName, columns: this.getColumns(viewName), query: "select * from "+ viewName, orderBy: null, result: null};
 		return viewData;
 	}
+	showToTableContainer(container) {	
+		this.dialogTable.hide();
+		document.getElementById("table-name").innerHTML = (this.currentStructure.type == Structure.VIEW ? "View " : "Table ") +this.currentStructure.name;
+		while(document.getElementById("container-table").firstChild) {
+			document.getElementById("container-table").removeChild(document.getElementById("container-table").firstChild);
+		}
+		document.getElementById("container-table").appendChild(container);
+
+		document.getElementById("menu-sqlite-insert").style.display = (this.currentStructure.type == Structure.VIEW ? 'none' : '');
+		document.getElementById("menu-sqlite-importCSV").style.display = (this.currentStructure.type == Structure.VIEW ? 'none' : '');
+
+		this.dialogTable.show();
+	}
+	exportResult(type) {
+		switch (type) {
+			case 'csv':
+			default:
+				if (!this.currentQuery) {
+					alert('You must execute a query before you can export!');
+					return;
+				}
+				this.exportFile({data: this.getExportData(this.currentQuery), filename: "file.csv", mime: 'text/csv'});
+				break;
+		}
+	}
+	exportTable(type) {
+		switch (type) {
+			case 'csv':
+			default:
+				this.exportFile({data: this.getExportData(this.currentStructure), filename: "file.csv", mime: 'text/csv'});
+				break;
+		}
+	}
 	loadTable(tableName) {
-		this.manageTabs('table');
+		// this.manageMenu('table', tableName);
 		this.currentStructure = this.getTableInfo(tableName);
 		var result = this.executeQuery(this.currentStructure);
-		this.selectTab ('row');
-		this.insertView(this.currentStructure);
+		// this.selectTab ('row');
+		// this.insertView(this.currentStructure);
 		this.structureView(tableName, this.currentStructure.type);
 		if (result && result.message) {
-			this.setMessage('SQLite-WebJS-editor-valid', result.message);
+			this.showToTableContainer(result.containerObj);
 		}
 	}
 	loadView(viewName) {
-		this.manageTabs('view');
-		this.selectTab ('row');
+		// this.manageMenu('view');
+		// this.selectTab ('row');
 		this.currentStructure = this.getViewInfo(viewName);
 		var result = this.executeQuery(this.currentStructure);
 		this.structureView(viewName, this.currentStructure.type);
 		if (result && result.message) {
-			this.setMessage('SQLite-WebJS-editor-valid', result.message);
+			this.showToTableContainer(result.containerObj);
 		}
 	}
 	loadDatabase(all) {
@@ -220,7 +228,8 @@ class SQLiteWebJS {
 		if (!type) {
 			type = Structure.TABLE;
 		}
-		var container = document.getElementById('container-structure'); 
+		var container = document.createElement('div'); 
+		container.classList.add('SQLite-WebJS-structure');
 		while (container.firstChild) container.removeChild(container.firstChild);
 		var containerSQL = document.createElement('div');
 		container.appendChild(containerSQL);
@@ -240,6 +249,7 @@ class SQLiteWebJS {
 				pre.appendChild(document.createTextNode("\n" + self.format(index.index_sql + ';')));
 			});
 		}
+		return container;
 	}
 	load(type, query, callback) {
 		var container = document.getElementById(type + '-list'); 
@@ -284,18 +294,35 @@ class SQLiteWebJS {
 	getColumnFromCurrentTable(field) {
 		return this.currentStructure.columns.reduce(function(accumulator, currentValue) { if (currentValue.name == field) return currentValue; else return accumulator; }, null);
 	}
-	executeQuery(options) {
+	executeQuery(options, containerObj = null) {
 		var self = this;
-		var resultExecute = {message: null};
+		var resultExecute = {message: null, containerObj : containerObj};
 		var exportToCSVContainer = document.getElementById((options.type ? 'exportToCSVRowContainer' : 'exportToCSVContainer'));
 		options.result = this.execute(options.query + (options && options.orderBy ? options.orderBy : ''), true);
-		var table;
-		if (options && [Structure.TABLE, Structure.VIEW].indexOf(options.type) !== -1) {
-			// var containerRow = document.getElementById('container-row');
-			// while (containerRow.firstChild) containerRow.removeChild(containerRow.firstChild);
-			table = document.getElementById('row-results');
-		} else {
-			table = document.getElementById('results');
+		if (!resultExecute.containerObj) {
+			resultExecute.containerObj = document.createElement('div');
+		}
+		let table = resultExecute.containerObj.querySelector('table');
+		if (!table) {
+			if (options && [Structure.TABLE, Structure.VIEW].indexOf(options.type) !== -1) {
+				// var containerRow = document.getElementById('container-row');
+				// while (containerRow.firstChild) containerRow.removeChild(containerRow.firstChild);
+				// table = document.getElementById('row-results');
+				table = document.createElement('table');
+				table.id = 'row-results';
+				table.classList.add("SQLite-WebJS-results");
+				table.createTHead();
+				table.createTBody();
+				
+				const info = document.createElement('div');
+				info.classList.add('SQLite-WebJS-editor-valid');
+				info.id = 'table-message';
+				info.innerText = '';
+				resultExecute.containerObj.appendChild(info);				
+				resultExecute.containerObj.appendChild(table);
+			} else {
+				table = document.getElementById('results');
+			}
 		}
 		var tBody = table.getElementsByTagName('tbody')[0];
 		var tHeader = table.getElementsByTagName('thead')[0];
@@ -304,7 +331,7 @@ class SQLiteWebJS {
 			table.deleteRow(i);
 		}
 		
-		exportToCSVContainer.style.display = 'none';
+		if (exportToCSVContainer) exportToCSVContainer.style.display = 'none';
 		
 		if (options.result instanceof Error) {
 			throw options.result;
@@ -332,7 +359,7 @@ class SQLiteWebJS {
 				ascButton.classList.add('SQLite-WebJS-browser-order');
 				ascButton.onclick = function() {
 					self.currentStructure.orderBy = ' ORDER BY ' + field + ' ASC ' ;
-					self.executeQuery(self.currentStructure);
+					self.executeQuery(self.currentStructure, resultExecute.containerObj);
 				};
 				cell.appendChild(document.createTextNode(" "));
 				cell.appendChild(ascButton);
@@ -343,7 +370,7 @@ class SQLiteWebJS {
 				// descButton.type = 'button';
 				descButton.onclick = function() {
 					self.currentStructure.orderBy = ' ORDER BY ' + field + ' DESC ' ;
-					self.executeQuery(self.currentStructure);
+					self.executeQuery(self.currentStructure, resultExecute.containerObj);
 				};
 				cell.appendChild(descButton);					
 			}
@@ -352,14 +379,17 @@ class SQLiteWebJS {
 		});
 
 		if (options.result.rows.length) {
-			exportToCSVContainer.style.display = '';
+			if (exportToCSVContainer) exportToCSVContainer.style.display = '';
 			if (options.result.rows.length == 1) resultExecute.message = "1 row";
 			else resultExecute.message = options.result.rows.length + " rows";
 		}
 		else {
 			resultExecute.message = "Query has no result";
 		}
-
+		if (options && options.type == Structure.TABLE) {
+			const info = resultExecute.containerObj.querySelector('#table-message');
+			info.innerText = resultExecute.message;
+		}
 		options.result.rows.forEach(function (row) {				
 			iLine++;
 			var newRow   = tBody.insertRow(tBody.rows.length);
@@ -380,7 +410,7 @@ class SQLiteWebJS {
 							+ " Where "
 							+ self.getWhereFromPKForCurrentTable(row)
 						);
-						self.executeQuery(options);
+						self.executeQuery(options, resultExecute.containerObj);
 						alert('The row has been removed');
 					};
 					newRow.insertCell(iColumn).appendChild(img);
@@ -430,9 +460,39 @@ class SQLiteWebJS {
 		return resultExecute;
 	}
 	insertView(tableInfo) {
-		var table = document.getElementById('row-insert');
-		var tBody = table.getElementsByTagName('tbody')[0];
-		var tHeader = table.getElementsByTagName('thead')[0];
+		const self = this;
+		const container = document.createElement('div');
+		container.id = "container-insert";
+		container.classList.add('SQLite-WebJS-container-center');
+		const table = document.createElement('table');
+		container.appendChild(table);
+		table.id="row-insert";
+		table.classList.add('SQLite-WebJS-results');
+		const tHeader = table.createTHead();
+		tHeader.appendChild(document.createElement('tr'));
+		['Column', 'Type', 'Null', 'Value'].forEach(function (c) {
+			const th = document.createElement('th');
+			th.appendChild(document.createTextNode(c));
+			tHeader.firstChild.appendChild(th);
+		});
+		const tBody = table.createTBody();
+		const tfoot = table.createTFoot();
+		const th = document.createElement('th');
+		th.colSpan = "4";
+		tfoot.appendChild(th);
+		const containerFoot = document.createElement('div');
+		th.appendChild(containerFoot);
+		containerFoot.classList.add('SQLite-WebJS-container-center');
+		const input = document.createElement('input');
+		containerFoot.appendChild(input);
+		input.type = "button";
+		input.classList.add("SQLite-WebJS-button");
+		input.value="Insert";
+		input.id="insertElementToTable";
+		input.addEventListener('click', function(e) {
+			self.insertElementToTable();
+		}, false);
+
 		var rowCount = table.rows.length;
 		for (var i = rowCount - 2; i > 0; i--) {
 			table.deleteRow(i);
@@ -479,6 +539,7 @@ class SQLiteWebJS {
 				}
 			}
 		});
+		return container;
 	}
 	insertElementToTable() {
 		var self = this;
@@ -680,16 +741,12 @@ class SQLiteWebJS {
 			structureTitle.onclick = fDisplay;
 		});
 		
-		this.manageTabs('nothing');
-		this.selectTab('SQL');
-	
 		document.getElementById('file-input').addEventListener('change', function(e) {
 			self.resetMessage();
 			if (document.getElementById('file-input').value != '') {		
 				self.setMessage('SQLite-WebJS-editor-inprogress', "Your database is loading.");
 				setTimeout(function() {
 					self.readSingleFile(e, ReadModeEnum.ARRAY_BUFFER, function(data) {
-						self.selectTab ('SQL');
 						document.getElementById('file-input').value = '';
 						self.loadStream(data);
 						self.loadDatabase(true);
@@ -712,16 +769,7 @@ class SQLiteWebJS {
 				}, 1);
 			}
 		}, false);
-		document.getElementById('exportToCSV').addEventListener('click', function(e) {
-			var fileInput = document.getElementById('file-input').value;
-			self.exportFile({data: self.getExportData(self.currentQuery), filename: "file.csv", mime: 'text/csv'}); 
-		}, false);
 
-		document.getElementById('exportToCSVRow').addEventListener('click', function(e) {
-			var fileInput = document.getElementById('file-input').value;
-			self.exportFile({data: self.getExportData(self.currentStructure), filename: "file.csv", mime: 'text/csv'}); 
-		}, false);
-			
 		document.getElementById('update').addEventListener('click', function(e) {
 			self.resetMessage();
 			self.setMessage('SQLite-WebJS-editor-inprogress', "Your database is loading.");
@@ -750,33 +798,227 @@ class SQLiteWebJS {
 			catch (e) {
 				self.setMessage('SQLite-WebJS-editor-error', e.message);
 			}
-		}, false);
+		}, false);		
 		
-		document.getElementById('selectCSVFile').addEventListener('click', function(e) {
-			self.selectCSVFile();
-		}, false);
+		this.dialogData = new A11yDialog(document.getElementById('dialog-data'));
+		this.dialogTable = new A11yDialog(document.getElementById('dialog-table'));
 		
-		document.getElementById('insertElementToTable').addEventListener('click', function(e) {
-			self.insertElementToTable();
-		}, false);
+		this.initMenu();
+	}
+	closeMenu(exceptMenu = null) {
+		document.querySelectorAll('.sub-menu ul').forEach(function(ul) {
+		  if (!exceptMenu || exceptMenu !== ul.parentNode) {
+			  ul.style.display = 'none';
+				ul.parentNode.querySelectorAll("i.arrow").forEach(function(i) {
+					i.classList.remove("up");
+					i.classList.add("down");
+				});
+		  }
+		});
+	}
+	initMenu() {
+		const self = this;
+		this.closeMenu();
+		document.querySelectorAll('.sub-menu a').forEach(function(a) {
+		  a.onclick = function () {
+			  let parent = a.parentNode;
+			  while (parent && !parent.classList.contains("sub-menu")) {
+				parent = parent.parentNode;
+			  }
+			  if (parent) {
+				self.closeMenu(parent);
+				parent.querySelectorAll("ul").forEach(function(ul) {
+					if (ul.style.display == '') {
+						ul.style.display = 'none';
+					} else {
+						ul.style.display = '';
+					}
+				});
+				parent.querySelectorAll("i.arrow").forEach(function(i) {
+					i.classList.toggle("up");
+					i.classList.toggle("down");
+				});
+			  }
+		  };
+		});
 
+		document.getElementById("menu-sqlite-exportCSVResults").addEventListener('click', function(e) {
+			self.closeMenu();
+			document.getElementById("dialog-data-title").innerHTML = 'Export results to CSV';
+			document.getElementById("dialog-data-container").innerHTML = `
+						<div id="exportToCSVContainer" class="SQLite-WebJS-export-container">
+							<br/>
+							<table class="SQLite-WebJS-results">
+								<tbody>
+									<tr>
+										<td>
+											Separator
+										</td>
+										<td>
+											<select class="select-action" id="separator"><option value=";">Semicolon</option><option value=",">Comma	</option><option value="	">Tab</option></select>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											NULL string
+										</td>
+										<td>
+											<input id="nullString" type="text" value="\N">
+										</td>
+									</tr>
+									<tr>
+										<td>
+											Header
+										</td>
+										<td>
+											<select class="select-action" id="headerQuery"><option value="yes">Yes</option><option value="no">No</option></select>
+										</td>
+									</tr>
+								</tbody>
+								<tfoot>
+									<tr>
+										<td colspan="2">
+											<div class="SQLite-WebJS-container-center">
+												<input type="button" value="export to CSV" id="exportToCSV" onclick="sqliteWebJS.exportResult('csv');" class="SQLite-WebJS-button" />
+											</div>
+										</td>
+									</tr>
+								</tfoot>
+							</table>
+						</div>`;
+			self.dialogData.show();
+		});		
+		document.getElementById("menu-sqlite-openDB").addEventListener('click', function(e) {
+			self.closeMenu();
+			document.getElementById('file-input').click();
+		});
+		document.getElementById("menu-sqlite-saveDB").addEventListener('click', function(e) {
+			self.closeMenu();
+			self.exportDatabaseFile();
+		});
 		
-		this.tabs.forEach(function (tab) {
-			document.getElementById('tab-'+tab).addEventListener('click', function(e) {
-				self.selectTab(tab);
-				switch (tab) {
-					case 'open-file': document.getElementById('file-input').click(); break;
-					case 'row': 
-						if (self.currentStructure.type === Structure.TABLE) {
-							self.loadTable(self.currentStructure.name); 
-						} else if (self.currentStructure.type === Structure.VIEW) {
-							self.loadView(self.currentStructure.name);
-						}
-						break;
-					case 'structure': self.structureView(self.currentStructure.name, self.currentStructure.type); break;
-					case 'export-file': self.exportDatabaseFile(); break;
-				}
-			}, false);
+		document.getElementById('menu-sqlite-exportCSV').addEventListener('click', function(e) {
+			const container = document.createElement('div');
+			container.innerHTML = `<table class="SQLite-WebJS-results">
+							<tbody>
+								<tr>
+									<td>
+										Separator
+									</td>
+									<td>
+										<select class="select-action" id="separatorRow"><option value=";">Semicolon</option><option value=",">Comma	</option><option value="	">Tab</option></select>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										NULL string
+									</td>
+									<td>
+										<input id="nullStringRow" type="text" value="\N">
+									</td>
+								</tr>
+								<tr>
+									<td>
+										Header
+									</td>
+									<td>
+										<select class="select-action" id="headerRow"><option value="yes">Yes</option><option value="no">No</option></select>
+									</td>
+								</tr>
+							</tbody>
+							<tfoot>
+								<tr>
+									<td colspan="2">
+										<div class="SQLite-WebJS-container-center">
+											<input type="button" value="Export to CSV" id="exportToCSVRow" onclick="sqliteWebJS.exportTable('csv');" class="SQLite-WebJS-button" />
+										</div>
+									</td>
+								</tr>
+							</tfoot>
+						</table>`;
+			self.showToTableContainer(container);
+		}, false);
+		document.getElementById("menu-sqlite-importCSV").addEventListener('click', function(e) {
+			self.closeMenu();
+			const container = document.createElement('div');
+			container.innerHTML = `<div class="SQLite-WebJS-container-center">
+				<table class="SQLite-WebJS-results">
+					<tbody>
+						<tr>
+							<td>
+								Separator
+								<br/> Specifies the character that separates columns within each row
+							</td>
+							<td>
+								<select class="select-action" id="ImportSeparator"><option value=";">Semicolon</option><option value=",">Comma	</option><option value="	">Tab</option></select>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								NULL string
+								<br/> Specifies the string that represents a null value
+							</td>
+							<td>
+								<input id="ImportNullString" type="text" value="\N">
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Header
+								<br/> Specifies that the file contains a header line with the names of column to import
+							</td>
+							<td>
+								<select class="select-action" id="ImportHeader"><option value="yes">Yes</option><option value="no">No</option></select>
+							</td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr>
+							<td colspan="2">
+								<div class="SQLite-WebJS-container-center">
+									<input type="button" class="SQLite-WebJS-button" value="Upload your CSV file" id="selectCSVFile" onclick="sqliteWebJS.selectCSVFile();"/>
+								</div>
+							</td>
+						</tr>
+					</tfoot>
+				</table>
+			</div>`;
+			self.showToTableContainer(container);
+		});
+		document.getElementById("menu-sqlite-insert").addEventListener('click', function(e) {
+			self.closeMenu();
+			const container = self.insertView(self.currentStructure);
+			self.showToTableContainer(container);
+		});
+		document.getElementById("menu-sqlite-structure").addEventListener('click', function(e) {
+			self.closeMenu();
+			const container = self.structureView(self.currentStructure.name, self.currentStructure.type);
+			self.showToTableContainer(container);
+		});
+		document.getElementById("menu-sqlite-browse").addEventListener('click', function(e) {
+			self.closeMenu();
+			if (self.currentStructure.type === Structure.TABLE) {
+				self.loadTable(self.currentStructure.name); 
+			} else if (self.currentStructure.type === Structure.VIEW) {
+				self.loadView(self.currentStructure.name);
+			}
+		});
+		
+		document.getElementById("menu-sqlite-openSQL").addEventListener('click', function(e) {
+			self.closeMenu();
+			document.getElementById('sql-input').click();
+		});
+		document.getElementById('sql-input').addEventListener('change', function(e) {
+			if (document.getElementById('sql-input').value != '') {
+				self.readSingleFile(e, ReadModeEnum.TEXT, function(data) {
+					document.getElementById('sql-input').value = '';
+					self.myCodeMirror.setValue(data);
+				});
+			}
+		});
+		document.getElementById("menu-sqlite-saveSQL").addEventListener('click', function(e) {
+			self.closeMenu();
+			self.exportFile({data: self.myCodeMirror.getValue("\n"), filename: "file.sql", mime: 'text/plain'});
 		});
 	}
 }
